@@ -5,5 +5,14 @@ import DA_SDK from 'https://da.live/nx/utils/sdk.js';
   const { context, token, actions } = await DA_SDK;
   const div = document.createElement('div');
   div.innerHTML = `<h1>Hello World</h1>`;
-  document.body.appendChild(div);
+
+  const btn = document.createElement('button');
+  btn.innerText = 'Push me!';
+
+  btn.addEventListener('click', () => {
+    actions.sendText('I was pushed!');
+    actions.closeLibrary();
+  });
+  
+  document.body.append(div, btn);
 }());

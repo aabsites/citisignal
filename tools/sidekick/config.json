@@ -6,7 +6,15 @@
             "title": "Library",
             "environments": ["edit", "dev"],
             "url": "/tools/sidekick/library.html"
-        },     
+        },
+        {
+            "id": "picker",
+            "title": "Commerce Picker",
+            "environments": ["edit"],
+            "daLibrary": true,
+            "path": "/tools/da/picker.html",
+            "icon": "https://main--citisignal--aabsites.aem.live/images/sidekick-icons/media_1404d03ca91fbb64cbec38601beb4c110bd76766f.png"
+        },
         {
             "id": "asset-library",
             "title": "AEM Assets Library",
