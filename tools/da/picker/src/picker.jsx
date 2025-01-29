@@ -4,7 +4,6 @@ import { defaultTheme, Provider, ListView, Item, Text, Image, Heading, Content, 
 import Folder from '@spectrum-icons/illustrations/Folder';
 import NotFound from '@spectrum-icons/illustrations/NotFound';
 import Error from '@spectrum-icons/illustrations/Error';
-import Copy from '@spectrum-icons/workflow/Copy';
 import ExperienceImport from "@spectrum-icons/workflow/ExperienceImport";
 import Settings from '@spectrum-icons/workflow/Settings';
 import DA_SDK from 'https://da.live/nx/utils/sdk.js';
@@ -386,7 +385,8 @@ const Picker = props => {
                     }
 
                     return <Item key={item.key} textValue={item.name}>
-                        {item.images && item.images.length > 0 && <Image src={item.images[0].url} alt={item.name} objectFit="contain" />}
+                        { /* No idea why, but the api is not returning https, which breaks. Temp fix .replace('http', 'https') */ }
+                        {item.images && item.images.length > 0 && <Image src={item.images[0].url.replace('http', 'https')} alt={item.name} objectFit="contain" />}
                         <Text><span dangerouslySetInnerHTML={{ __html: item.name }} /></Text>
                         {currentBlock.selection === 'single' && (currentBlock.type === 'any' || currentBlock.type === 'item') && <ActionButton aria-label="Copy" onPress={() => insertToPage(item.key)}><ExperienceImport /></ActionButton>}
                     </Item>;
