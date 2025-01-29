@@ -1,0 +1,27 @@
+{
+  "name": "franklin-picker",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "scripts": {
+    "watch": "parcel watch",
+    "start": "parcel src/index.html",
+    "prebuild": "rm -rf dist",
+    "build": "vite build --base=/tools/da/picker/dist/"
+  },
+  "author": "Mark J. Becker <mabecker@adobe.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "vite": "^6.0.11",
+    "@vitejs/plugin-react": "^4.3.4",
+    "process": "^0.11.10"
+  },
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.31.1",
+    "@spectrum-icons/illustrations": "^3.6.7",
+    "@spectrum-icons/ui": "^3.6.1",
+    "@spectrum-icons/workflow": "^4.2.6",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0"
+  }
+}

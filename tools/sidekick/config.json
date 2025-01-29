@@ -12,7 +12,7 @@
             "title": "Commerce Picker",
             "environments": ["edit"],
             "daLibrary": true,
-            "path": "/tools/da/picker.html",
+            "path": "/tools/da/picker/dist/src/index.html",
             "icon": "https://main--citisignal--aabsites.aem.live/images/sidekick-icons/media_1404d03ca91fbb64cbec38601beb4c110bd76766f.png"
         },
         {
@@ -30,7 +30,7 @@
             "title": "Generate Variations",
             "url": "https://experience.adobe.com/aem/generate-variations",
             "passConfig": true,
-            "environments": ["preview","live","edit"],            
+            "environments": ["preview","live","edit"],
             "includePaths": [ "**.docx**" ]
         },
         {
