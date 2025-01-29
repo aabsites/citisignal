@@ -5,6 +5,7 @@ import Folder from '@spectrum-icons/illustrations/Folder';
 import NotFound from '@spectrum-icons/illustrations/NotFound';
 import Error from '@spectrum-icons/illustrations/Error';
 import Copy from '@spectrum-icons/workflow/Copy';
+import ExperienceImport from "@spectrum-icons/workflow/ExperienceImport";
 import Settings from '@spectrum-icons/workflow/Settings';
 import DA_SDK from 'https://da.live/nx/utils/sdk.js';
 
@@ -354,7 +355,7 @@ const Picker = props => {
                             </Item>
                         )}
                     </RSPicker>
-                    {currentBlock.selection === 'multiple' && <ActionButton isDisabled={state.selectedItems.size === 0} aria-label="Copy" onPress={() => insertToPage(state.selectedItems)}><Copy /></ActionButton>}
+                    {currentBlock.selection === 'multiple' && <ActionButton isDisabled={state.selectedItems.size === 0} aria-label="Copy" onPress={() => insertToPage(state.selectedItems)}><ExperienceImport /></ActionButton>}
                 </Flex>
             </View>
             <Breadcrumbs onAction={selectFolder} isDisabled={currentBlock.selection === 'multiple'}>
@@ -380,14 +381,14 @@ const Picker = props => {
                             <Folder />
                             <Text>{item.name}</Text>
                             {item.childCount > 0 && <Text slot="description">{item.childCount} items</Text>}
-                            {currentBlock.selection === 'single' && (currentBlock.type === 'any' || currentBlock.type === 'folder') && <ActionButton aria-label="Copy" onPress={() => insertToPage(item.key)}><Copy /></ActionButton>}
+                            {currentBlock.selection === 'single' && (currentBlock.type === 'any' || currentBlock.type === 'folder') && <ActionButton aria-label="Copy" onPress={() => insertToPage(item.key)}><ExperienceImport /></ActionButton>}
                         </Item>
                     }
 
                     return <Item key={item.key} textValue={item.name}>
                         {item.images && item.images.length > 0 && <Image src={item.images[0].url} alt={item.name} objectFit="contain" />}
                         <Text><span dangerouslySetInnerHTML={{ __html: item.name }} /></Text>
-                        {currentBlock.selection === 'single' && (currentBlock.type === 'any' || currentBlock.type === 'item') && <ActionButton aria-label="Copy" onPress={() => insertToPage(item.key)}><Copy /></ActionButton>}
+                        {currentBlock.selection === 'single' && (currentBlock.type === 'any' || currentBlock.type === 'item') && <ActionButton aria-label="Copy" onPress={() => insertToPage(item.key)}><ExperienceImport /></ActionButton>}
                     </Item>;
                 }}
             </ListView>

@@ -4,8 +4,6 @@
   "description": "",
   "source": "src/index.html",
   "scripts": {
-    "watch": "parcel watch",
-    "start": "parcel src/index.html",
     "prebuild": "rm -rf dist",
     "build": "vite build --base=/tools/da/picker/dist/"
   },
