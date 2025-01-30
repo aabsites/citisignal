@@ -1,9 +1,0 @@
-/* stylelint-disable no-empty-source */
-
-.commerce-shipping-status {
-    margin-bottom: var(--spacing-small);
-}
-
-.commerce-shipping-status .order-shipping-status-card {
-    margin-bottom: var(--spacing-small);
-}
