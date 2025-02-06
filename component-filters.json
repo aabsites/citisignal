@@ -46,7 +46,7 @@
   },
   {
     "id": "column",
-    "components": ["text", "image", "button", "title"]
+    "components": ["text", "image"]
   },
   {
     "id": "accordion",

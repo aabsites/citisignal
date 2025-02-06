@@ -66,113 +66,18 @@
     ]
   },
   {
-    "id": "title",
-    "fields": [
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "jcr:title",
-        "value": "",
-        "label": "Text"
-      },
-      {
-        "component": "select",
-        "name": "type",
-        "value": "h1",
-        "label": "Type",
-        "valueType": "string",
-        "options": [
-          {
-            "name": "h1",
-            "value": "h1"
-          },
-          {
-            "name": "h2",
-            "value": "h2"
-          },
-          {
-            "name": "h3",
-            "value": "h3"
-          },
-          {
-            "name": "h4",
-            "value": "h4"
-          },
-          {
-            "name": "h5",
-            "value": "h5"
-          },
-          {
-            "name": "h6",
-            "value": "h6"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "id": "image",
     "fields": [
       {
         "component": "reference",
-        "valueType": "string",
-        "name": "fileReference",
+        "name": "img:nth-child(4)[src]",
         "label": "Image",
         "multi": false
       },
       {
         "component": "text",
-        "valueType": "string",
-        "name": "alt",
-        "value": "Default alt",
+        "name": "img:nth-child(4)[alt]",
         "label": "Alt Text"
-      }
-    ]
-  },
-  {
-    "id": "button",
-    "fields": [
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "href",
-        "value": "",
-        "label": "Link"
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "text",
-        "value": "",
-        "label": "Text"
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "title",
-        "value": "",
-        "label": "Title"
-      },
-      {
-        "component": "select",
-        "name": "type",
-        "value": "",
-        "label": "Type",
-        "valueType": "string",
-        "options": [
-          {
-            "name": "default",
-            "value": ""
-          },
-          {
-            "name": "primary",
-            "value": "primary"
-          },
-          {
-            "name": "secondary",
-            "value": "secondary"
-          }
-        ]
       }
     ]
   },
@@ -250,13 +155,6 @@
     "id": "hero",
     "fields": [
       {
-        "component": "reference",
-        "valueType": "string",
-        "name": "image",
-        "label": "Image",
-        "multi": false
-      },
-      {
         "component": "multiselect",
         "valueType": "string",
         "name": "classes",
@@ -282,58 +180,24 @@
         ]
       },
       {
+        "component": "reference",
+        "valueType": "string",
+        "name": "div:nth-child(1)>div:nth-child(1)>p:nth-child(1)>picture:nth-child(1)>img:nth-child(4)[src]",
+        "label": "Image",
+        "multi": false
+      },
+      {
         "component": "text",
         "valueType": "string",
-        "name": "imageAlt",
+        "name": "div:nth-child(1)>div:nth-child(1)>p:nth-child(1)>picture:nth-child(1)>img:nth-child(4)[alt]",
         "label": "Alt",
         "value": ""
       },
       {
-        "component": "text",
-        "valueType": "string",
-        "name": "heading",
-        "label": "Heading",
-        "value": ""
-      },
-      {
-        "component": "select",
-        "name": "headingType",
-        "value": "",
-        "label": "Heading Type",
-        "valueType": "string",
-        "options": [
-          {
-            "name": "h1",
-            "value": "h1"
-          }
-        ]
-      },
-      {
         "component": "richtext",
-        "name": "hero_text",
+        "name": "div:nth-child(1)>div:nth-child(1)>h1:nth-child(2)",
         "value": "",
-        "label": "Description",
-        "valueType": "string"
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "hero_linkTitle",
-        "label": "Button Title Attribute",
-        "value": ""
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "hero_linkText",
-        "label": "Button Text",
-        "value": ""
-      },
-      {
-        "component": "aem-content",
-        "name": "hero_link",
-        "value": "",
-        "label": "Button Link",
+        "label": "Text",
         "valueType": "string"
       }
     ]
