@@ -250,37 +250,22 @@
       {
         "component": "reference",
         "valueType": "string",
-        "name": "image",
+        "name": "div:nth-child(1)>div:nth-child(1)>picture:nth-child(1)>img:nth-child(3)[src]",
         "label": "Image",
         "multi": false
       },
       {
         "component": "text",
         "valueType": "string",
-        "name": "imageAlt",
+        "name": "div:nth-child(1)>div:nth-child(1)>picture:nth-child(1)>img:nth-child(3)[alt]",
         "label": "Alt",
         "value": ""
       },
       {
         "component": "richtext",
-        "name": "content_text",
+        "name": "div:nth-child(2)>div:nth-child(1)",
         "value": "",
         "label": "Text",
-        "valueType": "string"
-      },
-
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "content_linkText",
-        "label": "Button Text",
-        "value": ""
-      },
-      {
-        "component": "aem-content",
-        "name": "content_link",
-        "value": "",
-        "label": "Button Link",
         "valueType": "string"
       }
     ]
