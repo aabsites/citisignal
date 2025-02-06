@@ -182,20 +182,27 @@
       {
         "component": "reference",
         "valueType": "string",
-        "name": "div:nth-child(1)>div:nth-child(1)>p:nth-child(1)>picture:nth-child(1)>img:nth-child(4)[src]",
+        "name": "div:nth-child(1)>div:nth-child(1)>p:nth-child(1)>picture:nth-child(1)>img:nth-child(3)[src]",
         "label": "Image",
         "multi": false
       },
       {
         "component": "text",
         "valueType": "string",
-        "name": "div:nth-child(1)>div:nth-child(1)>p:nth-child(1)>picture:nth-child(1)>img:nth-child(4)[alt]",
+        "name": "div:nth-child(1)>div:nth-child(1)>p:nth-child(1)>picture:nth-child(1)>img:nth-child(3)[alt]",
         "label": "Alt",
         "value": ""
       },
       {
+        "component": "text",
+        "name": "div:nth-child(2)>div:nth-child(1)>h1:nth-child(1)",
+        "value": "",
+        "label": "Title",
+        "valueType": "string"
+      },
+      {
         "component": "richtext",
-        "name": "div:nth-child(1)>div:nth-child(1)>h1:nth-child(2)",
+        "name": "div:nth-child(3)>div:nth-child(1)",
         "value": "",
         "label": "Text",
         "valueType": "string"
