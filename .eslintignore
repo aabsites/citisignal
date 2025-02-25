@@ -1,7 +1,9 @@
 helix-importer-ui
 scripts/htm.js
 scripts/acdl
+tools/da
 tools/picker
+tools/segments
 tools/pdp-metadata
 scripts/__dropins__
 scripts/commerce-events-collector.js

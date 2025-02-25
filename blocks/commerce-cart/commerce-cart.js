@@ -28,6 +28,7 @@ export default async function decorate(block) {
     'enable-estimate-shipping': enableEstimateShipping = 'false',
     'start-shopping-url': startShoppingURL = '',
     'checkout-url': checkoutURL = '',
+    'show-estimated-delivery': showEstimatedDelivery = 'false',
   } = readBlockConfig(block);
 
   const cart = Cart.getCartDataFromCache();
@@ -80,6 +81,32 @@ export default async function decorate(block) {
       attributesToHide: hideAttributes.split(',').map((attr) => attr.trim().toLowerCase()),
       enableUpdateItemQuantity: enableUpdateItemQuantity === 'true',
       enableRemoveItem: enableRemoveItem === 'true',
+      slots: {
+        ProductAttributes: (ctx) => {
+          // Prepend Product Attributes
+          const productAttributes = ctx.item?.productAttributes;
+          productAttributes?.forEach((attr) => {
+            if (showEstimatedDelivery === 'true' && attr.code === 'Estimated Delivery') {
+              if (attr.selected_options) {
+                const selectedOptions = attr.selected_options
+                  .filter((option) => option.label.trim() !== '')
+                  .map((option) => option.label)
+                  .join(', ');
+                if (selectedOptions) {
+                  const productAttribute = document.createElement('div');
+                  productAttribute.innerHTML = `Estimated delivery: <strong>${selectedOptions}</strong>`;
+                  return ctx.appendChild(productAttribute);
+                }
+              } else if (attr.value) {
+                const productAttribute = document.createElement('div');
+                productAttribute.innerHTML = `Estimated delivery: <strong>${attr.value}</strong>`;
+                return ctx.appendChild(productAttribute);
+              }
+            }
+            return null;
+          });
+        },
+      },
     })($list),
 
     // Order Summary
