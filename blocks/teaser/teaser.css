@@ -38,6 +38,7 @@
   height: 100%;
   width: 100%;
   max-height: 290px;
+  min-height: 210px;
   object-fit: contain;
   padding: 1rem;
   box-sizing: border-box;

@@ -422,6 +422,7 @@ button {
   font: var(--type-base-font-family);
 }
 
+button.button.primary,
 button.button-primary,
 a.button.primary,
 a.button-primary,
@@ -443,6 +444,7 @@ a.button.error-button-home {
   border-radius: 24px;
 }
 
+button.button.primary:hover,
 button.button-primary:hover,
 a.button.primary:hover,
 a.button-primary:hover {
@@ -451,12 +453,14 @@ a.button-primary:hover {
   text-decoration: none;
 }
 
+button.button.primary:active,
 button.button-primary:active,
 a.button.primary:active,
 a.button-primary:active {
   background-color: var(--color-brand-700);
 }
 
+button.button.secondary,
 button.button-secondary,
 a.button.secondary,
 a.button-secondary {
@@ -484,6 +488,7 @@ button:not([class^='elsie-']):disabled:hover {
   cursor: unset;
 }
 
+button.button.secondary:hover,
 a.button.secondary:hover,
 button:not([class^='elsie-']).secondary:hover {
   background-color: var(--black-brand-500);
@@ -885,4 +890,70 @@ body.columns main > .section:empty {
 */
 main[hidden] {
   display: none !important;
+}
+
+/* toast notification */
+#toast-container {
+  position: fixed;
+  z-index: 60;
+  right: 15px;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.toast {
+  visibility: hidden;
+  max-width: 498px;
+  min-height: 120px;
+  width: 100%;
+  background-color: #EFF5EF;
+  border-left: 4px solid #53824C;
+  color: #000;
+  text-align: left;
+  padding: 16px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.5s, top 0.5s;
+  box-sizing: border-box;
+}
+
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+  top: 0;
+}
+
+.toast .close-icon:hover {
+  cursor: pointer;
+}
+
+.toast .toast-wrapper {
+  position: relative;
+}
+
+.toast .toast-wrapper span {
+  position: absolute;
+  right: 0;
+}
+
+.toast .toast-wrapper div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+}
+
+.toast .toast-wrapper p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 3.5rem;
+}
+
+@media (width <= 768px) {
+  #toast-container {
+    right: 0;
+    top: 0;
+  }
 }

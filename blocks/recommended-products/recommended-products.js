@@ -1,15 +1,18 @@
-import { createOptimizedPicture } from '../../scripts/aem.js';
+import { createOptimizedPicture, readBlockConfig } from '../../scripts/aem.js';
 import { jsx } from '../../scripts/scripts.js';
+import initToast from '../product-details/toast.js';
 
 export default async function decorate(block) {
+  const config = readBlockConfig(block);
   const link = block.querySelector('a');
   const response = await fetch(link.href);
+  const enableAddToCart = config['enable-addtocart']?.toLowerCase() === 'true' || false;
 
   if (!response.ok) {
     return;
   }
   const records = await response.json();
-  const initCards = records.data.slice(0, 8); // Grab the first 8 items in list
+  const initCards = records.data;
   const cards = [];
   let activeIndex = 0;
 
@@ -17,23 +20,63 @@ export default async function decorate(block) {
     const pic = createOptimizedPicture(item.image, item.name, true, [{ width: '710' }]);
     pic.querySelector('img').width = '710';
     pic.querySelector('img').height = '485';
-    cards.push(jsx`
-      <div class="slider-item ${index === activeIndex ? 'active' : ''}" data-productname="${item.name}">
-        <div class="slider-image">
-          <a href="${item.path}"><div class="image-wrapper">${pic.outerHTML}</div></a>
+
+    let card;
+    if (enableAddToCart && item.sku) {
+      // Create card with Add to Cart button
+      card = jsx`
+        <div class="slider-item ${index === activeIndex ? 'active' : ''}" data-productname="${item.name}">
+          <div class="slider-image">
+            <a href="${item.path}"><div class="image-wrapper">${pic.outerHTML}</div></a>
+          </div>
+          <div class="slider-content">
+            <p class="slider-content__product-name">${item.name}</p>
+            <span class="slider-content__price">${item.price}</span>
+            <button role="button" class="add-to-cart-btn button secondary" data-attr-sku="${item.sku}">Add to cart</button>
+          </div>
         </div>
-      </div>
-    `);
+      `;
+    } else {
+      // Create card without Add to Cart button
+      card = jsx`
+        <div class="slider-item ${index === activeIndex ? 'active' : ''}" data-productname="${item.name}">
+          <div class="slider-image">
+            <a href="${item.path}"><div class="image-wrapper">${pic.outerHTML}</div></a>
+          </div>
+        </div>
+      `;
+    }
+
+    cards.push(card);
   });
 
   block.innerHTML = jsx`<section class="slider">
-    <span class="slider-control prev"><i class="gg-chevron-left-o"></i></span>
-    <span class="slider-control next"><i class="gg-chevron-right-o"></i></span>
-    <div class="slider-container" data-multislide="false" data-step="sm">
-      ${cards.join('')}
-    </div>
-  </section>
-`;
+      <span class="slider-control prev"><i class="gg-chevron-left-o"></i></span>
+      <span class="slider-control next"><i class="gg-chevron-right-o"></i></span>
+      <div class="slider-container" data-multislide="false" data-step="sm">
+        ${cards.join('')}
+      </div>
+    </section>
+  `;
+
+  // enable add-to-cart functionality
+  if (enableAddToCart) {
+    const addToCartButtons = block.querySelectorAll('.add-to-cart-btn');
+
+    addToCartButtons.forEach((btn) => {
+      const sku = btn.getAttribute('data-attr-sku');
+      const quantity = 1;
+
+      btn.addEventListener('click', async () => {
+        const { addProductsToCart } = await import('@dropins/storefront-cart/api.js');
+        await addProductsToCart([{ sku, quantity }]);
+
+        // init Toast
+        const productItem = sku.split('/')[0];
+        initToast(quantity, productItem);
+      });
+    });
+  }
 
   const slider = block.querySelector('.slider-container');
   const sliderControlPrev = block.querySelector('.slider-control.prev');

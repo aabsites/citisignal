@@ -1,3 +1,11 @@
 .targeted-block > div:not(:last-child) {
     display: none;
 }
+
+.targeted-block .section {
+    padding: 0;
+}
+
+.targeted-block .section:last-of-type {
+    padding-bottom: 0;
+}
