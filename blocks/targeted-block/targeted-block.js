@@ -64,6 +64,7 @@ const updateTargetedBlocksVisibility = async () => {
 };
 
 export default function decorate(block) {
+  console.log("testing")
   block.style.display = 'none';
   blocks.push(readBlockConfig(block));
   block.setAttribute('data-targeted-block-key', blocks.length - 1);
