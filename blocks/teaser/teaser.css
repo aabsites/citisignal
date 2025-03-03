@@ -1,7 +1,7 @@
 .teaser {
   display: flex;
   align-items: stretch;
-  min-height: 290px;
+  /* max-height: 290px; */
   border-radius: 20px;
   box-sizing: border-box;
   background-color: var(--color-neutral-200);

@@ -1,3 +1,8 @@
+/* set min-height to improve performance on home page */
+.targeted-block-container {
+    min-height: 500px;
+}
+
 .targeted-block > div:not(:last-child) {
     display: none;
 }
@@ -8,4 +13,10 @@
 
 .targeted-block .section:last-of-type {
     padding-bottom: 0;
+}
+
+@media (width >= 900px) {
+    .targeted-block-container {
+        min-height: 290px;
+    }
 }
