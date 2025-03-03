@@ -1,6 +1,6 @@
 /* set min-height to improve performance on home page */
 .targeted-block-container {
-    min-height: 500px;
+    min-height: 520px;
 }
 
 .targeted-block > div:not(:last-child) {
