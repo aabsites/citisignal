@@ -1,3 +1,6 @@
+import { createOptimizedPicture } from '../../scripts/aem.js';
+import { moveInstrumentation } from '../../scripts/scripts.js';
+
 export default function decorate(block) {
   const wrapTeaserWithLink = block.classList.contains('teaser-link-true');
   const link = block.querySelector('a');
@@ -11,6 +14,12 @@ export default function decorate(block) {
     } else {
       row.classList.add('wrapper');
     }
+
+    row.querySelectorAll('picture > img').forEach((img) => {
+      const optimizedPic = createOptimizedPicture(img.src, img.alt, false, [{ width: '375' }]);
+      moveInstrumentation(img, optimizedPic.querySelector('img'));
+      img.closest('picture').replaceWith(optimizedPic);
+    });
   });
 }
 
