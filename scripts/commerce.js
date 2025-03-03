@@ -156,7 +156,7 @@ export async function getSkuFromUrl() {
     result = pathStr?.[3];
   }
   if (path.startsWith('/products/')) {
-    const pathStr = path.match(/\/products\/[\w|-]+\/(.+)$/);
+    const pathStr = path.match(/\/products\/(.+)$/);
     result = pathStr?.[1];
   }
   if (path.startsWith('/products/default')) {
