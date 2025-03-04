@@ -23,6 +23,12 @@ export const createCheckoutService = (block, elements) => {
     $placeOrder,
   } = elements;
 
+  // Add event listeners
+  events.on('checkout/display-order-summary', () => {
+    console.log('Received checkout/display-order-summary event');
+    displayOrderSummary();
+  });
+
   const displayOverlaySpinner = async () => {
     if ($loader.children.length > 0) return;
     
@@ -306,6 +312,74 @@ export const createCheckoutService = (block, elements) => {
     })($orderConfirmationFooterContinueBtn);
   };
 
+  const displayOrderSummary = async () => {
+    if ($orderSummary.children.length > 0) return;
+    const { OrderSummary } = await import('@dropins/storefront-cart/containers/OrderSummary.js');
+    const { CartSummaryList } = await import('@dropins/storefront-cart/containers/CartSummaryList.js');
+    const { Coupons } = await import('@dropins/storefront-cart/containers/Coupons.js');
+    const { EstimateShipping } = await import('@dropins/storefront-checkout/containers/EstimateShipping.js');
+    const { render: CartProvider } = await import('@dropins/storefront-cart/render.js');
+    const { render: CheckoutProvider } = await import('@dropins/storefront-checkout/render.js');
+
+    // Render OrderSummary with slots
+    const orderSummary = await CartProvider.render(OrderSummary, {
+      className: 'checkout-order-summary',
+      slots: {
+        EstimateShipping: (esCtx) => {
+          const estimateShippingForm = document.createElement('div');
+          estimateShippingForm.classList.add('checkout-estimate-shipping');
+          CheckoutProvider.render(EstimateShipping)(estimateShippingForm);
+          esCtx.appendChild(estimateShippingForm);
+        },
+        Coupons: (ctx) => {
+          const coupons = document.createElement('div');
+          coupons.classList.add('checkout-coupons');
+          CartProvider.render(Coupons)(coupons);
+          ctx.appendChild(coupons);
+        },
+      },
+    })($orderSummary);
+
+    // Render CartSummaryList with heading
+    const cartSummary = await CartProvider.render(CartSummaryList, {
+      className: 'checkout-cart-summary-list',
+      variant: 'secondary',
+      slots: {
+        Heading: (headingCtx) => {
+          const title = 'Your Cart ({count})';
+          const cartSummaryListHeading = document.createElement('div');
+          cartSummaryListHeading.classList.add('cart-summary-list__heading');
+
+          const cartSummaryListHeadingText = document.createElement('div');
+          cartSummaryListHeadingText.classList.add('cart-summary-list__heading-text');
+          cartSummaryListHeadingText.innerText = title.replace(
+            '({count})',
+            headingCtx.count ? `(${headingCtx.count})` : '',
+          );
+
+          const editCartLink = document.createElement('a');
+          editCartLink.classList.add('cart-summary-list__edit');
+          editCartLink.href = '/cart';
+          editCartLink.rel = 'noreferrer';
+          editCartLink.innerText = 'Edit';
+
+          cartSummaryListHeading.appendChild(cartSummaryListHeadingText);
+          cartSummaryListHeading.appendChild(editCartLink);
+          headingCtx.appendChild(cartSummaryListHeading);
+
+          headingCtx.onChange((nextHeadingCtx) => {
+            cartSummaryListHeadingText.innerText = title.replace(
+              '({count})',
+              nextHeadingCtx.count ? `(${nextHeadingCtx.count})` : '',
+            );
+          });
+        },
+      },
+    })($cartSummary);
+
+    return { orderSummary, cartSummary };
+  };
+
   return {
     displayOverlaySpinner,
     removeOverlaySpinner,
@@ -321,5 +395,6 @@ export const createCheckoutService = (block, elements) => {
     displayPaymentMethods,
     displayPlaceOrder,
     displayOrderConfirmation,
+    displayOrderSummary,
   };
 }; 

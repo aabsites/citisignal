@@ -53,6 +53,7 @@ export const checkoutMachine = createMachine({
         },
         {
           target: 'initializingCheckout',
+          actions: ['initializeCheckout', 'displayOrderSummary'],
         },
       ],
     },
@@ -61,7 +62,7 @@ export const checkoutMachine = createMachine({
       entry: 'displayEmptyCart',
     },
     initializingCheckout: {
-      entry: 'initializeCheckout',
+      entry: ['initializeCheckout'],
       on: {
         'authenticated': {
           target: 'displayingCustomerForms',
@@ -184,6 +185,9 @@ export const checkoutMachine = createMachine({
     },
     initializeCheckout: ({ context }) => {
       events.emit('checkout/initialize');
+    },
+    displayOrderSummary: ({ context }) => {
+      events.emit('checkout/display-order-summary');
     },
     displayGuestAddressForms: ({ context }) => {
       events.emit('checkout/display-guest-forms', {
