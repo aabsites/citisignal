@@ -146,20 +146,24 @@ export const checkoutMachine = createMachine({
     isCartEmpty: ({ context, event }) => {
       // If no event data, check context
       if (!event?.data) {
-        return !context.cartId;
+        return !context.cartId || context.cartId === null;
       }
       return isCartEmpty(event.data);
     },
     isCheckoutEmpty: ({ context, event }) => {
       // If no event data, check context
       if (!event?.data) {
-        return !context.cartId;
+        return !context.cartId || context.cartId === null;
       }
       return isCheckoutEmpty(event.data);
     },
   },
   actions: {
     handleCartInitialized: ({ context, event }) => {
+      if (!event?.data) {
+        context.cartId = null;
+        return;
+      }
       context.cartId = event.data.id;
     },
     handleCheckoutInitialized: ({ context, event }) => {

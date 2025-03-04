@@ -193,6 +193,7 @@ export const createCheckoutService = (block, elements) => {
           const orderData = await placeOrder(cartId);
           if (orderData) {
             events.emit('order/placed', orderData);
+            await displayOrderConfirmation(orderData);
           }
         } catch (error) {
           console.error('Error placing order:', error);
@@ -223,47 +224,62 @@ export const createCheckoutService = (block, elements) => {
       </div>
     `);
 
+    // Order confirmation elements
+    const $orderConfirmationHeader = orderConfirmationFragment.querySelector('.order-confirmation__header');
+    const $orderStatus = orderConfirmationFragment.querySelector('.order-confirmation__order-status');
+    const $shippingStatus = orderConfirmationFragment.querySelector('.order-confirmation__shipping-status');
+    const $customerDetails = orderConfirmationFragment.querySelector('.order-confirmation__customer-details');
+    const $orderCostSummary = orderConfirmationFragment.querySelector('.order-confirmation__order-cost-summary');
+    const $orderProductList = orderConfirmationFragment.querySelector('.order-confirmation__order-product-list');
+    const $orderConfirmationFooter = orderConfirmationFragment.querySelector('.order-confirmation__footer');
+
+    const { initializers } = await import('@dropins/tools/initializer.js');
+    const orderApi = await import('@dropins/storefront-order/api.js');
+    await initializers.mountImmediately(orderApi.initialize, { orderData });
+
     block.replaceChildren(orderConfirmationFragment);
 
-    // Render order confirmation components
+    const handleSignUpClick = async ({ inputsDefaultValueSet, addressesData }) => {
+      const signUpForm = document.createElement('div');
+      const { render: AuthProvider } = await import('@dropins/storefront-auth/render.js');
+      const { SignUp } = await import('@dropins/storefront-auth/containers/SignUp.js');
+      const { authPrivacyPolicyConsentSlot } = await import('@dropins/storefront-auth/slots.js');
+      
+      AuthProvider.render(SignUp, {
+        routeSignIn: () => '/customer/login',
+        routeRedirectOnEmailConfirmationClose: () => '/customer/account',
+        inputsDefaultValueSet,
+        addressesData,
+        slots: {
+          ...authPrivacyPolicyConsentSlot,
+        },
+      })(signUpForm);
+
+      await showModal(signUpForm);
+    };
+
     const { render: OrderProvider } = await import('@dropins/storefront-order/render.js');
-    const {
-      OrderHeader,
-      OrderStatus,
-      ShippingStatus,
-      CustomerDetails,
-      OrderCostSummary,
-      OrderProductList,
-    } = await import('@dropins/storefront-order/containers/index.js');
+    const { OrderHeader } = await import('@dropins/storefront-order/containers/OrderHeader.js');
+    const { OrderStatus } = await import('@dropins/storefront-order/containers/OrderStatus.js');
+    const { ShippingStatus } = await import('@dropins/storefront-order/containers/ShippingStatus.js');
+    const { CustomerDetails } = await import('@dropins/storefront-order/containers/CustomerDetails.js');
+    const { OrderCostSummary } = await import('@dropins/storefront-order/containers/OrderCostSummary.js');
+    const { OrderProductList } = await import('@dropins/storefront-order/containers/OrderProductList.js');
+
 
     await OrderProvider.render(OrderHeader, {
       handleEmailAvailability: checkoutApi.isEmailAvailable,
+      handleSignUpClick,
       orderData,
-    })(orderConfirmationFragment.querySelector('.order-confirmation__header'));
+    })($orderConfirmationHeader);
 
-    await OrderProvider.render(OrderStatus, { slots: { OrderActions: () => null } })(
-      orderConfirmationFragment.querySelector('.order-confirmation__order-status'),
-    );
-    
-    await OrderProvider.render(ShippingStatus)(
-      orderConfirmationFragment.querySelector('.order-confirmation__shipping-status'),
-    );
-    
-    await OrderProvider.render(CustomerDetails)(
-      orderConfirmationFragment.querySelector('.order-confirmation__customer-details'),
-    );
-    
-    await OrderProvider.render(OrderCostSummary)(
-      orderConfirmationFragment.querySelector('.order-confirmation__order-cost-summary'),
-    );
-    
-    await OrderProvider.render(OrderProductList)(
-      orderConfirmationFragment.querySelector('.order-confirmation__order-product-list'),
-    );
+    await OrderProvider.render(OrderStatus, { slots: { OrderActions: () => null } })($orderStatus);
+    await OrderProvider.render(ShippingStatus)($shippingStatus);
+    await OrderProvider.render(CustomerDetails)($customerDetails);
+    await OrderProvider.render(OrderCostSummary)($orderCostSummary);
+    await OrderProvider.render(OrderProductList)($orderProductList);
 
-    // Add continue shopping button
-    const footer = orderConfirmationFragment.querySelector('.order-confirmation__footer');
-    footer.innerHTML = `
+    $orderConfirmationFooter.innerHTML = `
       <div class="order-confirmation-footer__continue-button"></div>
       <div class="order-confirmation-footer__contact-support">
         <p>
@@ -275,15 +291,19 @@ export const createCheckoutService = (block, elements) => {
       </div>
     `;
 
-    const { Button } = await import('@dropins/tools/components.js');
-    await Button.render({
+    const $orderConfirmationFooterContinueBtn = $orderConfirmationFooter.querySelector(
+      '.order-confirmation-footer__continue-button',
+    );
+
+    const { Button, provider: UI } = await import('@dropins/tools/components.js');
+    await UI.render(Button, {
       children: 'Continue shopping',
       className: 'order-confirmation-footer__continue-button',
       size: 'medium',
       variant: 'primary',
       type: 'submit',
       href: '/',
-    })(footer.querySelector('.order-confirmation-footer__continue-button'));
+    })($orderConfirmationFooterContinueBtn);
   };
 
   return {
