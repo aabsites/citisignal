@@ -21,6 +21,11 @@ export default function decorate(block) {
 function setupImageTeaser(row) {
   const pic = row.querySelector('picture');
   if (pic) {
+    const img = pic.querySelector('img');
+    if (img) {
+      img.loading = 'eager'; // Remove lazy loading
+    }
+
     const picWrapper = pic.parentElement;
     if (picWrapper && picWrapper.children.length === 1) {
       picWrapper.classList.add('teaser-img-col');
