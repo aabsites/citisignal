@@ -189,9 +189,9 @@
 }
 
 .product-details.featured-pdp .pdp-carousel__slide > img {
-  max-height: 850px;
+  /* max-height: 850px; */
   border-radius: 8px;
-  background: var(--loyalty-promotion);
+  /* background: var(--loyalty-promotion); */
   box-sizing: border-box;
   padding: 1rem;
 }
@@ -264,6 +264,11 @@
   width: 100%;
 }
 
+@media (width >= 900px) {
+  .product-details.gallery-quad .pdp-carousel--main-image-controls .pdp-carousel__wrapper {
+    width: 50vw;
+  }
+}
 
 /* pdp description */
 .pdp-description,
