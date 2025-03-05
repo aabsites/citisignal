@@ -5,6 +5,13 @@ import * as checkoutApi from '@dropins/storefront-checkout/api.js';
 import * as authApi from '@dropins/storefront-auth/api.js';
 import { isCartEmpty, isCheckoutEmpty } from '../../../checkout.js';
 
+const DEBOUNCE_TIME = 1000;
+const LOGIN_FORM_NAME = 'login-form';
+const SHIPPING_FORM_NAME = 'selectedShippingAddress';
+const BILLING_FORM_NAME = 'selectedBillingAddress';
+const SHIPPING_ADDRESS_DATA_KEY = `${SHIPPING_FORM_NAME}_addressData`;
+const BILLING_ADDRESS_DATA_KEY = `${BILLING_FORM_NAME}_addressData`;
+
 export const checkoutMachine = createMachine({
   id: 'checkout',
   initial: 'idle',

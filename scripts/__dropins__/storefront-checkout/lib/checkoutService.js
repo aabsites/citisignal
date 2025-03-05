@@ -3,6 +3,40 @@ import * as cartApi from '@dropins/storefront-cart/api.js';
 import * as checkoutApi from '@dropins/storefront-checkout/api.js';
 import * as authApi from '@dropins/storefront-auth/api.js';
 import { getUserTokenCookie } from '../../../initializers/index.js';
+// Scripts
+import {
+  estimateShippingCost,
+  getCartAddress,
+  isCartEmpty,
+  isCheckoutEmpty,
+  scrollToElement,
+  setAddressOnCart,
+} from '../../../../scripts/checkout.js';
+
+// Account Dropin
+import Addresses from '@dropins/storefront-account/containers/Addresses.js';
+import AddressForm from '@dropins/storefront-account/containers/AddressForm.js';
+import { render as AccountProvider } from '@dropins/storefront-account/render.js';
+
+const DEBOUNCE_TIME = 1000;
+const LOGIN_FORM_NAME = 'login-form';
+const SHIPPING_FORM_NAME = 'selectedShippingAddress';
+const BILLING_FORM_NAME = 'selectedBillingAddress';
+const SHIPPING_ADDRESS_DATA_KEY = `${SHIPPING_FORM_NAME}_addressData`;
+const BILLING_ADDRESS_DATA_KEY = `${BILLING_FORM_NAME}_addressData`;
+
+  // Container and component references
+  let loader;
+  let modal;
+  let emptyCart;
+  const shippingFormRef = { current: null };
+  const billingFormRef = { current: null };
+  const creditCardFormRef = { current: null };
+  let shippingForm;
+  let billingForm;
+  let shippingAddresses;
+  let billingAddresses;
+
 export const createCheckoutService = (block, elements) => {
   const {
     $content,
@@ -77,32 +111,109 @@ export const createCheckoutService = (block, elements) => {
     $content.classList.remove('checkout__content--empty');
   };
 
+
+  
+  
   const displayGuestAddressForms = async (data) => {
     if (data.isVirtual) {
+      shippingForm?.remove();
+      shippingForm = null;
       $shippingForm.innerHTML = '';
-      return;
+    } else if (!shippingForm) {
+      const cartShippingAddress = getCartAddress(data, 'shipping');
+
+      const shippingAddressCache = sessionStorage.getItem(
+        SHIPPING_ADDRESS_DATA_KEY,
+      );
+
+      if (cartShippingAddress && shippingAddressCache) {
+        sessionStorage.removeItem(SHIPPING_ADDRESS_DATA_KEY);
+      }
+
+      // shippingFormSkeleton.remove();
+
+      let isFirstRenderShipping = true;
+      const hasCartShippingAddress = Boolean(data.shippingAddresses?.[0]);
+
+      const setShippingAddressOnCart = setAddressOnCart({
+        api: checkoutApi.setShippingAddress,
+        debounceMs: DEBOUNCE_TIME,
+        // placeOrderBtn: $placeOrder,
+      });
+
+      const estimateShippingCostOnCart = estimateShippingCost({
+        api: checkoutApi.estimateShippingMethods,
+        debounceMs: DEBOUNCE_TIME,
+      });
+
+      const storeConfig = checkoutApi.getStoreConfigCache();
+
+      shippingForm = await AccountProvider.render(AddressForm, {
+        addressesFormTitle: 'Shipping address',
+        className: 'checkout-shipping-form__address-form',
+        formName: SHIPPING_FORM_NAME,
+        forwardFormRef: shippingFormRef,
+        hideActionFormButtons: true,
+        inputsDefaultValueSet: cartShippingAddress ?? {
+          countryCode: storeConfig.defaultCountry,
+        },
+        isOpen: true,
+        onChange: (values) => {
+          const syncAddress = !isFirstRenderShipping || !hasCartShippingAddress;
+          if (syncAddress) setShippingAddressOnCart(values);
+          if (!hasCartShippingAddress) estimateShippingCostOnCart(values);
+          if (isFirstRenderShipping) isFirstRenderShipping = false;
+        },
+        showBillingCheckBox: false,
+        showFormLoader: false,
+        showShippingCheckBox: false,
+      })($shippingForm);
     }
 
-    const { AddressForm } = await import('@dropins/storefront-account/containers/AddressForm.js');
-    const { render: AccountProvider } = await import('@dropins/storefront-account/render.js');
-    const { setAddressOnCart } = await import('../../../checkout.js');
-    
-    const shippingForm = await AccountProvider.render(AddressForm, {
-      addressesFormTitle: 'Shipping address',
-      className: 'checkout-shipping-form__address-form',
-      formName: 'selectedShippingAddress',
-      hideActionFormButtons: true,
-      isOpen: true,
-      showFormLoader: false,
-      showBillingCheckBox: false,
-      showShippingCheckBox: false,
-      onChange: setAddressOnCart({
-        api: checkoutApi.setShippingAddress,
-        debounceMs: 1000,
-      }),
-    })($shippingForm);
+    if (!billingForm) {
+      const cartBillingAddress = getCartAddress(data, 'billing');
 
-    return shippingForm;
+      const billingAddressCache = sessionStorage.getItem(
+        BILLING_ADDRESS_DATA_KEY,
+      );
+
+      if (cartBillingAddress && billingAddressCache) {
+        sessionStorage.removeItem(BILLING_ADDRESS_DATA_KEY);
+      }
+
+      // billingFormSkeleton.remove();
+
+      let isFirstRenderBilling = true;
+      const hasCartBillingAddress = Boolean(data.billingAddress);
+
+      const setBillingAddressOnCart = setAddressOnCart({
+        api: checkoutApi.setBillingAddress,
+        debounceMs: DEBOUNCE_TIME,
+        // placeOrderBtn: placeOrder,
+      });
+
+      const storeConfig = checkoutApi.getStoreConfigCache();
+
+      billingForm = await AccountProvider.render(AddressForm, {
+        addressesFormTitle: 'Billing address',
+        className: 'checkout-billing-form__address-form',
+        formName: BILLING_FORM_NAME,
+        forwardFormRef: billingFormRef,
+        hideActionFormButtons: true,
+        inputsDefaultValueSet: cartBillingAddress ?? {
+          countryCode: storeConfig.defaultCountry,
+        },
+        isOpen: true,
+        onChange: (values) => {
+          const canSetBillingAddressOnCart = !isFirstRenderBilling || !hasCartBillingAddress;
+          if (canSetBillingAddressOnCart) setBillingAddressOnCart(values);
+          if (isFirstRenderBilling) isFirstRenderBilling = false;
+        },
+        showBillingCheckBox: false,
+        showFormLoader: false,
+        showShippingCheckBox: false,
+      })($billingForm);
+    }
   };
 
   const displayCustomerAddressForms = async (data) => {
@@ -136,6 +247,7 @@ export const createCheckoutService = (block, elements) => {
     const { render: CheckoutProvider } = await import('@dropins/storefront-checkout/render.js');
     
     const loginForm = await CheckoutProvider.render(LoginForm, {
+      name: LOGIN_FORM_NAME,
       className: 'checkout-login-form',
     })($login);
 
@@ -147,9 +259,21 @@ export const createCheckoutService = (block, elements) => {
 
     const { BillToShippingAddress } = await import('@dropins/storefront-checkout/containers/BillToShippingAddress.js');
     const { render: CheckoutProvider } = await import('@dropins/storefront-checkout/render.js');
-    
-    const billToShipping = await CheckoutProvider.render(BillToShippingAddress, {
-      className: 'checkout-bill-to-shipping',
+
+    const billToShipping = CheckoutProvider.render(BillToShippingAddress, {
+      hideOnVirtualCart: true,
+      onChange: (checked) => {
+        $billingForm.style.display = checked ? 'none' : 'block';
+        if (!checked && billingFormRef?.current) {
+          const { formData, isDataValid } = billingFormRef.current;
+
+          setAddressOnCart({
+            api: checkoutApi.setBillingAddress,
+            debounceMs: DEBOUNCE_TIME,
+            // placeOrderBtn: placeOrder,
+          })({ data: formData, isDataValid });
+        }
+      },
     })($billToShipping);
 
     return billToShipping;
@@ -202,6 +326,43 @@ export const createCheckoutService = (block, elements) => {
 
     const placeOrderComponent = await CheckoutProvider.render(PlaceOrder, {
       className: 'checkout-place-order',
+      handleValidation: () => {
+        console.log('handleValidation');
+        let success = true;
+        const { forms } = document;
+
+        const loginForm = forms[LOGIN_FORM_NAME];
+
+        if (loginForm) {
+          success = loginForm.checkValidity();
+          if (!success) scrollToElement($login);
+        }
+
+        const shippingForm = forms[SHIPPING_FORM_NAME];
+
+        if (
+          success
+          && shippingFormRef.current
+          && shippingForm
+          && shippingForm.checkVisibility()
+        ) {
+          success = shippingFormRef.current.handleValidationSubmit(false);
+        }
+
+        const billingForm = forms[BILLING_FORM_NAME];
+
+        if (
+          success
+          && billingFormRef.current
+          && billingForm
+          && billingForm.checkVisibility()
+        ) {
+          success = billingFormRef.current.handleValidationSubmit(false);
+        }
+        console.log('success', success);
+
+        return success;
+      },
       handlePlaceOrder: async ({ cartId, code }) => {
         try {
           events.emit('checkout/place-order');
