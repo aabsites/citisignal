@@ -3,6 +3,7 @@ import * as cartApi from '@dropins/storefront-cart/api.js';
 import * as checkoutApi from '@dropins/storefront-checkout/api.js';
 import { getUserTokenCookie } from '../../scripts/initializers/index.js';
 import { authPrivacyPolicyConsentSlot, SUPPORT_PATH } from '../../scripts/constants.js';
+import { placeOrder } from '@dropins/storefront-order/api.js';
 // Scripts
 import {
   estimateShippingCost,
@@ -41,6 +42,7 @@ const BILLING_ADDRESS_DATA_KEY = `${BILLING_FORM_NAME}_addressData`;
   const shippingFormRef = { current: null };
   const billingFormRef = { current: null };
   const creditCardFormRef = { current: null };
+  const placeOrderRef = { current: null };
   let shippingForm;
   let billingForm;
   let shippingAddresses;
@@ -139,15 +141,13 @@ export const createCheckoutService = (block, elements) => {
         sessionStorage.removeItem(SHIPPING_ADDRESS_DATA_KEY);
       }
 
-      // shippingFormSkeleton.remove();
-
       let isFirstRenderShipping = true;
       const hasCartShippingAddress = Boolean(data.shippingAddresses?.[0]);
 
       const setShippingAddressOnCart = setAddressOnCart({
         api: checkoutApi.setShippingAddress,
         debounceMs: DEBOUNCE_TIME,
-        // placeOrderBtn: $placeOrder,
+        placeOrderBtn: placeOrderRef.current,
       });
 
       const estimateShippingCostOnCart = estimateShippingCost({
@@ -190,15 +190,13 @@ export const createCheckoutService = (block, elements) => {
         sessionStorage.removeItem(BILLING_ADDRESS_DATA_KEY);
       }
 
-      // billingFormSkeleton.remove();
-
       let isFirstRenderBilling = true;
       const hasCartBillingAddress = Boolean(data.billingAddress);
 
       const setBillingAddressOnCart = setAddressOnCart({
         api: checkoutApi.setBillingAddress,
         debounceMs: DEBOUNCE_TIME,
-        // placeOrderBtn: placeOrder,
+        placeOrderBtn: placeOrderRef.current,
       });
 
       const storeConfig = checkoutApi.getStoreConfigCache();
@@ -262,7 +260,7 @@ export const createCheckoutService = (block, elements) => {
       const setShippingAddressOnCart = setAddressOnCart({
         api: checkoutApi.setShippingAddress,
         debounceMs: DEBOUNCE_TIME,
-        // placeOrderBtn: placeOrder,
+        placeOrderBtn: placeOrderRef.current,
       });
 
       shippingAddresses = await AccountProvider.render(Addresses, {
@@ -318,7 +316,7 @@ export const createCheckoutService = (block, elements) => {
       const setBillingAddressOnCart = setAddressOnCart({
         api: checkoutApi.setBillingAddress,
         debounceMs: DEBOUNCE_TIME,
-        // placeOrderBtn: placeOrder,
+        placeOrderBtn: placeOrderRef.current,
       });
 
       billingAddresses = await AccountProvider.render(Addresses, {
@@ -401,7 +399,7 @@ export const createCheckoutService = (block, elements) => {
           setAddressOnCart({
             api: checkoutApi.setBillingAddress,
             debounceMs: DEBOUNCE_TIME,
-            // placeOrderBtn: placeOrder,
+            placeOrderBtn: placeOrderRef.current,
           })({ data: formData, isDataValid });
         }
       },
@@ -442,7 +440,6 @@ export const createCheckoutService = (block, elements) => {
     const { PlaceOrder } = await import('@dropins/storefront-checkout/containers/PlaceOrder.js');
     const { ServerError } = await import('@dropins/storefront-checkout/containers/ServerError.js');
     const { render: CheckoutProvider } = await import('@dropins/storefront-checkout/render.js');
-    const { placeOrder } = await import('@dropins/storefront-order/api.js');
     
     // Initialize server error handling
     await CheckoutProvider.render(ServerError, {
@@ -455,7 +452,7 @@ export const createCheckoutService = (block, elements) => {
       },
     })($serverError);
 
-    const placeOrderComponent = await CheckoutProvider.render(PlaceOrder, {
+    placeOrderRef.current = await CheckoutProvider.render(PlaceOrder, {
       className: 'checkout-place-order',
       handleValidation: () => {
         console.log('handleValidation');
@@ -514,7 +511,7 @@ export const createCheckoutService = (block, elements) => {
       },
     })($placeOrder);
 
-    return placeOrderComponent;
+    return placeOrderRef.current;
   };
 
   const displayOrderConfirmation = async (orderData) => {
