@@ -3,7 +3,7 @@ import { events } from '@dropins/tools/event-bus.js';
 import * as cartApi from '@dropins/storefront-cart/api.js';
 import * as checkoutApi from '@dropins/storefront-checkout/api.js';
 import * as authApi from '@dropins/storefront-auth/api.js';
-import { isCartEmpty, isCheckoutEmpty } from '../../../checkout.js';
+import { isCartEmpty, isCheckoutEmpty } from '../../scripts/checkout.js';
 
 export const checkoutMachine = createMachine({
   id: 'checkout',

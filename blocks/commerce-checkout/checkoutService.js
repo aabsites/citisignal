@@ -1,7 +1,7 @@
 import { events } from '@dropins/tools/event-bus.js';
 import * as cartApi from '@dropins/storefront-cart/api.js';
 import * as checkoutApi from '@dropins/storefront-checkout/api.js';
-import { getUserTokenCookie } from '../../../initializers/index.js';
+import { getUserTokenCookie } from '../../scripts/initializers/index.js';
 // Scripts
 import {
   estimateShippingCost,
@@ -10,7 +10,7 @@ import {
   isCheckoutEmpty,
   scrollToElement,
   setAddressOnCart,
-} from '../../../../scripts/checkout.js';
+} from '../../scripts/checkout.js';
 
 // Auth Dropin
 import * as authApi from '@dropins/storefront-auth/api.js';
@@ -24,7 +24,7 @@ import AddressForm from '@dropins/storefront-account/containers/AddressForm.js';
 import { render as AccountProvider } from '@dropins/storefront-account/render.js';
 
 // Block-level
-import createModal from '../../../../blocks/modal/modal.js';
+import createModal from '../modal/modal.js';
 
 const DEBOUNCE_TIME = 1000;
 const LOGIN_FORM_NAME = 'login-form';

@@ -5,8 +5,8 @@
 /* eslint-disable prefer-const */
 
 import { createActor } from 'xstate';
-import { checkoutMachine } from '../../scripts/__dropins__/storefront-checkout/lib/checkoutMachine.js';
-import { createCheckoutService } from '../../scripts/__dropins__/storefront-checkout/lib/checkoutService.js';
+import { checkoutMachine } from './checkoutMachine.js';
+import { createCheckoutService } from './checkoutService.js';
 import { events } from '@dropins/tools/event-bus.js';
 import { initializers } from '@dropins/tools/initializer.js';
 import { getConfigValue } from '../../scripts/configs.js';
@@ -121,13 +121,6 @@ export default async function decorate(block) {
     setMetaTags('Order Confirmation');
     document.title = 'Order Confirmation';
   });
-
-  const DEBOUNCE_TIME = 1000;
-  const LOGIN_FORM_NAME = 'login-form';
-  const SHIPPING_FORM_NAME = 'selectedShippingAddress';
-  const BILLING_FORM_NAME = 'selectedBillingAddress';
-  const SHIPPING_ADDRESS_DATA_KEY = `${SHIPPING_FORM_NAME}_addressData`;
-  const BILLING_ADDRESS_DATA_KEY = `${BILLING_FORM_NAME}_addressData`;
 
   // Define the Layout for the Checkout
   const checkoutFragment = document.createRange().createContextualFragment(`
