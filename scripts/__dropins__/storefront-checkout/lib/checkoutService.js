@@ -1,7 +1,6 @@
 import { events } from '@dropins/tools/event-bus.js';
 import * as cartApi from '@dropins/storefront-cart/api.js';
 import * as checkoutApi from '@dropins/storefront-checkout/api.js';
-import * as authApi from '@dropins/storefront-auth/api.js';
 import { getUserTokenCookie } from '../../../initializers/index.js';
 // Scripts
 import {
@@ -13,10 +12,19 @@ import {
   setAddressOnCart,
 } from '../../../../scripts/checkout.js';
 
+// Auth Dropin
+import * as authApi from '@dropins/storefront-auth/api.js';
+import AuthCombine from '@dropins/storefront-auth/containers/AuthCombine.js';
+import SignUp from '@dropins/storefront-auth/containers/SignUp.js';
+import { render as AuthProvider } from '@dropins/storefront-auth/render.js';
+
 // Account Dropin
 import Addresses from '@dropins/storefront-account/containers/Addresses.js';
 import AddressForm from '@dropins/storefront-account/containers/AddressForm.js';
 import { render as AccountProvider } from '@dropins/storefront-account/render.js';
+
+// Block-level
+import createModal from '../../../../blocks/modal/modal.js';
 
 const DEBOUNCE_TIME = 1000;
 const LOGIN_FORM_NAME = 'login-form';
@@ -36,6 +44,7 @@ const BILLING_ADDRESS_DATA_KEY = `${BILLING_FORM_NAME}_addressData`;
   let billingForm;
   let shippingAddresses;
   let billingAddresses;
+
 
 export const createCheckoutService = (block, elements) => {
   const {
@@ -79,7 +88,6 @@ export const createCheckoutService = (block, elements) => {
   };
 
   const showModal = async (content) => {
-    const { createModal } = await import('../modal/modal.js');
     const modal = await createModal([content]);
     modal.showModal();
     return modal;
@@ -246,10 +254,38 @@ export const createCheckoutService = (block, elements) => {
     const { LoginForm } = await import('@dropins/storefront-checkout/containers/LoginForm.js');
     const { render: CheckoutProvider } = await import('@dropins/storefront-checkout/render.js');
     
-    const loginForm = await CheckoutProvider.render(LoginForm, {
+    // const loginForm = await CheckoutProvider.render(LoginForm, {
+    //   name: LOGIN_FORM_NAME,
+    //   className: 'checkout-login-form',
+    // })($login);
+
+    const loginForm = CheckoutProvider.render(LoginForm, {
       name: LOGIN_FORM_NAME,
-      className: 'checkout-login-form',
-    })($login);
+      onSignInClick: async (initialEmailValue) => {
+        const signInForm = document.createElement('div');
+
+        AuthProvider.render(AuthCombine, {
+          signInFormConfig: {
+            renderSignUpLink: true,
+            initialEmailValue,
+            onSuccessCallback: () => {
+              displayOverlaySpinner();
+            },
+          },
+          signUpFormConfig: {
+            slots: {
+              // ...authPrivacyPolicyConsentSlot,
+            },
+          },
+          resetPasswordFormConfig: {},
+        })(signInForm);
+
+        showModal(signInForm);
+      },
+      onSignOutClick: () => {
+        authApi.revokeCustomerToken();
+      },
+    })($login)
 
     return loginForm;
   };
@@ -424,7 +460,7 @@ export const createCheckoutService = (block, elements) => {
       const signUpForm = document.createElement('div');
       const { render: AuthProvider } = await import('@dropins/storefront-auth/render.js');
       const { SignUp } = await import('@dropins/storefront-auth/containers/SignUp.js');
-      const { authPrivacyPolicyConsentSlot } = await import('@dropins/storefront-auth/slots.js');
+      // const { authPrivacyPolicyConsentSlot } = await import('@dropins/storefront-auth/slots.js');
       
       AuthProvider.render(SignUp, {
         routeSignIn: () => '/customer/login',
@@ -432,7 +468,7 @@ export const createCheckoutService = (block, elements) => {
         inputsDefaultValueSet,
         addressesData,
         slots: {
-          ...authPrivacyPolicyConsentSlot,
+          // ...authPrivacyPolicyConsentSlot,
         },
       })(signUpForm);
 
