@@ -2,6 +2,7 @@ import { events } from '@dropins/tools/event-bus.js';
 import * as cartApi from '@dropins/storefront-cart/api.js';
 import * as checkoutApi from '@dropins/storefront-checkout/api.js';
 import { getUserTokenCookie } from '../../scripts/initializers/index.js';
+import { authPrivacyPolicyConsentSlot, SUPPORT_PATH } from '../../scripts/constants.js';
 // Scripts
 import {
   estimateShippingCost,
@@ -368,7 +369,7 @@ export const createCheckoutService = (block, elements) => {
           },
           signUpFormConfig: {
             slots: {
-              // ...authPrivacyPolicyConsentSlot,
+              ...authPrivacyPolicyConsentSlot,
             },
           },
           resetPasswordFormConfig: {},
@@ -554,7 +555,6 @@ export const createCheckoutService = (block, elements) => {
       const signUpForm = document.createElement('div');
       const { render: AuthProvider } = await import('@dropins/storefront-auth/render.js');
       const { SignUp } = await import('@dropins/storefront-auth/containers/SignUp.js');
-      // const { authPrivacyPolicyConsentSlot } = await import('@dropins/storefront-auth/slots.js');
       
       AuthProvider.render(SignUp, {
         routeSignIn: () => '/customer/login',
@@ -562,7 +562,7 @@ export const createCheckoutService = (block, elements) => {
         inputsDefaultValueSet,
         addressesData,
         slots: {
-          // ...authPrivacyPolicyConsentSlot,
+          ...authPrivacyPolicyConsentSlot,
         },
       })(signUpForm);
 
