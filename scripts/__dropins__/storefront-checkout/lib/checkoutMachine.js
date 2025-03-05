@@ -5,13 +5,6 @@ import * as checkoutApi from '@dropins/storefront-checkout/api.js';
 import * as authApi from '@dropins/storefront-auth/api.js';
 import { isCartEmpty, isCheckoutEmpty } from '../../../checkout.js';
 
-const DEBOUNCE_TIME = 1000;
-const LOGIN_FORM_NAME = 'login-form';
-const SHIPPING_FORM_NAME = 'selectedShippingAddress';
-const BILLING_FORM_NAME = 'selectedBillingAddress';
-const SHIPPING_ADDRESS_DATA_KEY = `${SHIPPING_FORM_NAME}_addressData`;
-const BILLING_ADDRESS_DATA_KEY = `${BILLING_FORM_NAME}_addressData`;
-
 export const checkoutMachine = createMachine({
   id: 'checkout',
   initial: 'idle',
@@ -76,9 +69,15 @@ export const checkoutMachine = createMachine({
           actions: 'handleAuthenticated',
         },
       },
-      always: {
-        target: 'displayingGuestForms',
-      },
+      always: [
+        {
+          target: 'displayingCustomerForms',
+          guard: 'isLoggedIn',
+        },
+        {
+          target: 'displayingGuestForms',
+        }
+      ],
     },
     displayingGuestForms: {
       entry: 'displayGuestAddressForms',
@@ -165,6 +164,9 @@ export const checkoutMachine = createMachine({
       }
       return isCheckoutEmpty(event.data);
     },
+    isLoggedIn: ({ context }) => {
+      return !context.isGuest;
+    },
   },
   actions: {
     handleCartInitialized: ({ context, event }) => {
@@ -175,8 +177,10 @@ export const checkoutMachine = createMachine({
       context.cartId = event.data.id;
     },
     handleCheckoutInitialized: ({ context, event }) => {
-      context.isGuest = event.data.isGuest;
-      context.isVirtual = event.data.isVirtual;
+      if (event?.data) {
+        context.isGuest = event.data.isGuest;
+        context.isVirtual = event.data.isVirtual;
+      }
     },
     handleCheckoutUpdated: ({ context, event }) => {
       // Handle checkout updates

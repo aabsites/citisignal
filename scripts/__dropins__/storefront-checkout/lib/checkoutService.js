@@ -226,26 +226,120 @@ export const createCheckoutService = (block, elements) => {
 
   const displayCustomerAddressForms = async (data) => {
     if (data.isVirtual) {
+      shippingAddresses?.remove();
+      shippingAddresses = null;
       $shippingForm.innerHTML = '';
-      return;
+    } else if (!shippingAddresses) {
+      shippingForm?.remove();
+      shippingForm = null;
+      shippingFormRef.current = null;
+
+      const cartShippingAddress = getCartAddress(data, 'shipping');
+
+      const shippingAddressId = cartShippingAddress
+        ? cartShippingAddress?.id ?? 0
+        : undefined;
+
+      const shippingAddressCache = sessionStorage.getItem(
+        SHIPPING_ADDRESS_DATA_KEY,
+      );
+
+      // clear persisted shipping address if cart has a shipping address
+      if (cartShippingAddress && shippingAddressCache) {
+        sessionStorage.removeItem(SHIPPING_ADDRESS_DATA_KEY);
+      }
+
+      const storeConfig = checkoutApi.getStoreConfigCache();
+
+      const inputsDefaultValueSet = cartShippingAddress && cartShippingAddress.id === undefined
+        ? cartShippingAddress
+        : { countryCode: storeConfig.defaultCountry };
+
+      const hasCartShippingAddress = Boolean(data.shippingAddresses?.[0]);
+      let isFirstRenderShipping = true;
+
+      const setShippingAddressOnCart = setAddressOnCart({
+        api: checkoutApi.setShippingAddress,
+        debounceMs: DEBOUNCE_TIME,
+        // placeOrderBtn: placeOrder,
+      });
+
+      shippingAddresses = await AccountProvider.render(Addresses, {
+        addressFormTitle: 'Deliver to new address',
+        defaultSelectAddressId: shippingAddressId,
+        formName: SHIPPING_FORM_NAME,
+        forwardFormRef: shippingFormRef,
+        inputsDefaultValueSet,
+        minifiedView: false,
+        onAddressData: (values) => {
+          const canSetShippingAddressOnCart = !isFirstRenderShipping || !hasCartShippingAddress;
+          if (canSetShippingAddressOnCart) setShippingAddressOnCart(values);
+          if (isFirstRenderShipping) isFirstRenderShipping = false;
+        },
+        selectable: true,
+        selectShipping: true,
+        showBillingCheckBox: false,
+        showSaveCheckBox: true,
+        showShippingCheckBox: false,
+        title: 'Shipping address',
+      })($shippingForm);
     }
 
-    const { Addresses } = await import('@dropins/storefront-account/containers/Addresses.js');
-    const { render: AccountProvider } = await import('@dropins/storefront-account/render.js');
-    
-    const shippingAddresses = await AccountProvider.render(Addresses, {
-      addressFormTitle: 'Deliver to new address',
-      formName: 'selectedShippingAddress',
-      minifiedView: false,
-      selectable: true,
-      selectShipping: true,
-      showBillingCheckBox: false,
-      showSaveCheckBox: true,
-      showShippingCheckBox: false,
-      title: 'Shipping address',
-    })($shippingForm);
+    if (!billingAddresses) {
+      billingForm?.remove();
+      billingForm = null;
+      billingFormRef.current = null;
 
-    return shippingAddresses;
+      const cartBillingAddress = getCartAddress(data, 'billing');
+
+      const billingAddressId = cartBillingAddress
+        ? cartBillingAddress?.id ?? 0
+        : undefined;
+
+      const billingAddressCache = sessionStorage.getItem(
+        BILLING_ADDRESS_DATA_KEY,
+      );
+
+      // clear persisted billing address if cart has a billing address
+      if (cartBillingAddress && billingAddressCache) {
+        sessionStorage.removeItem(BILLING_ADDRESS_DATA_KEY);
+      }
+
+      const storeConfig = checkoutApi.getStoreConfigCache();
+
+      const inputsDefaultValueSet = cartBillingAddress && cartBillingAddress.id === undefined
+        ? cartBillingAddress
+        : { countryCode: storeConfig.defaultCountry };
+
+      const hasCartBillingAddress = Boolean(data.billingAddress);
+      let isFirstRenderBilling = true;
+
+      const setBillingAddressOnCart = setAddressOnCart({
+        api: checkoutApi.setBillingAddress,
+        debounceMs: DEBOUNCE_TIME,
+        // placeOrderBtn: placeOrder,
+      });
+
+      billingAddresses = await AccountProvider.render(Addresses, {
+        addressFormTitle: 'Bill to new address',
+        defaultSelectAddressId: billingAddressId,
+        formName: BILLING_FORM_NAME,
+        forwardFormRef: billingFormRef,
+        inputsDefaultValueSet,
+        minifiedView: false,
+        onAddressData: (values) => {
+          const canSetBillingAddressOnCart = !isFirstRenderBilling || !hasCartBillingAddress;
+          if (canSetBillingAddressOnCart) setBillingAddressOnCart(values);
+          if (isFirstRenderBilling) isFirstRenderBilling = false;
+        },
+        selectable: true,
+        selectBilling: true,
+        showBillingCheckBox: false,
+        showSaveCheckBox: true,
+        showShippingCheckBox: false,
+        title: 'Billing address',
+      })($billingForm);
+    }
   };
 
   const displayLoginForm = async () => {
