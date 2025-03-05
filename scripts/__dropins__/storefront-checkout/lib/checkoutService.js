@@ -185,9 +185,21 @@ export const createCheckoutService = (block, elements) => {
     if ($placeOrder.children.length > 0) return;
 
     const { PlaceOrder } = await import('@dropins/storefront-checkout/containers/PlaceOrder.js');
+    const { ServerError } = await import('@dropins/storefront-checkout/containers/ServerError.js');
     const { render: CheckoutProvider } = await import('@dropins/storefront-checkout/render.js');
     const { placeOrder } = await import('@dropins/storefront-order/api.js');
     
+    // Initialize server error handling
+    await CheckoutProvider.render(ServerError, {
+      autoScroll: true,
+      onRetry: () => {
+        $content.classList.remove('checkout__content--error');
+      },
+      onServerError: () => {
+        $content.classList.add('checkout__content--error');
+      },
+    })($serverError);
+
     const placeOrderComponent = await CheckoutProvider.render(PlaceOrder, {
       className: 'checkout-place-order',
       handlePlaceOrder: async ({ cartId, code }) => {
@@ -203,7 +215,9 @@ export const createCheckoutService = (block, elements) => {
           }
         } catch (error) {
           console.error('Error placing order:', error);
-          // Handle error appropriately
+          throw error;
+        } finally {
+          removeOverlaySpinner();
         }
       },
     })($placeOrder);
