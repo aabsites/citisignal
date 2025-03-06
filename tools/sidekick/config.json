@@ -22,7 +22,7 @@
       "titleI18n": {
         "en": "Experimentation"
       },
-      "environments": ["dev", "preview"],
+      "environments": ["any"],
       "event": "experimentation"
     }
   ]

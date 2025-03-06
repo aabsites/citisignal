@@ -8,6 +8,4 @@ export default async function decorate(block) {
 
   contentOne?.classList.add('overlay');
   contentTwo?.classList.add('overlay');
-
-  contentTwo?.querySelector('.button-container a')?.classList.add('button-primary');
 }
