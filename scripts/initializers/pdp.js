@@ -44,27 +44,13 @@ await initializeDropin(async () => {
     }
   }
 
-  let product;
-  let labels;
-
-  [product, labels] = await Promise.all([
+  const [product, labels] = await Promise.all([
     fetchProductData(sku, { optionsUIDs, skipTransform: true }).then(preloadImageMiddleware),
     placeholders,
   ]);
 
   if (!product?.sku) {
-    try {
-      // set default pdp product
-      const defaultProduct = placeholders?.PDP?.DefaultProduct;
-      sku = defaultProduct;
-
-      [product, labels] = await Promise.all([
-        fetchProductData(sku, { optionsUIDs, skipTransform: true }).then(preloadImageMiddleware),
-        placeholders,
-      ]);
-    } catch {
-      return loadErrorPage();
-    }
+    return loadErrorPage();
   }
 
   const langDefinitions = {
