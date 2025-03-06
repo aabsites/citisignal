@@ -16,6 +16,14 @@ export const checkoutMachine = createMachine({
     shippingAddress: null,
     billingAddress: null,
     error: null,
+    activeStep: 1, // Track the active step in the checkout flow
+    stepsCompleted: {
+      step1: false,
+      step2: false,
+      step3: false,
+      step4: false,
+    },
+    validationErrors: {},
   },
   states: {
     idle: {
@@ -65,74 +73,104 @@ export const checkoutMachine = createMachine({
       entry: ['initializeCheckout'],
       on: {
         'authenticated': {
-          target: 'displayingCustomerForms',
+          target: 'displayingStep1',
           actions: 'handleAuthenticated',
+        },
+        'step/change': {
+          actions: 'handleStepChange',
+        },
+        'form/validate': {
+          actions: 'validateForm',
+        },
+        'shipping/address-updated': {
+          actions: ['handleShippingAddressUpdated', 'markStep1Complete'],
         },
       },
       always: [
         {
-          target: 'displayingCustomerForms',
-          guard: 'isLoggedIn',
-        },
-        {
-          target: 'displayingGuestForms',
+          target: 'displayingStep1',
         }
       ],
     },
-    displayingGuestForms: {
-      entry: 'displayGuestAddressForms',
+    displayingStep1: {
+      entry: ['displayLoginForm', 'displayShippingAddress'],
       on: {
         'authenticated': {
-          target: 'displayingCustomerForms',
           actions: 'handleAuthenticated',
+        },
+        'step/change': {
+          actions: 'handleStepChange',
+        },
+        'form/validate': {
+          actions: 'validateForm',
         },
         'shipping/address-updated': {
-          target: 'displayingBillToShipping',
-          actions: 'handleShippingAddressUpdated',
+          target: 'displayingStep2',
+          actions: ['handleShippingAddressUpdated', 'markStep1Complete'],
+        },
+        'step/continue': {
+          target: 'displayingStep2',
+          guard: 'isStep1Valid',
+          actions: 'markStep1Complete',
         },
       },
-      always: {
-        target: 'displayingLoginForm',
-      },
     },
-    displayingCustomerForms: {
-      entry: 'displayCustomerAddressForms',
-      always: {
-        target: 'displayingLoginForm',
-      },
-    },
-    displayingLoginForm: {
-      entry: 'displayLoginForm',
-      on: {
-        'authenticated': {
-          target: 'displayingBillToShipping',
-          actions: 'handleAuthenticated',
-        },
-      },
-      always: {
-        target: 'displayingBillToShipping',
-      },
-    },
-    displayingBillToShipping: {
-      entry: 'displayBillToShipping',
-      always: {
-        target: 'displayingShippingMethods',
-      },
-    },
-    displayingShippingMethods: {
+    displayingStep2: {
       entry: 'displayShippingMethods',
-      always: {
-        target: 'displayingPaymentMethods',
+      on: {
+        'step/change': {
+          actions: 'handleStepChange',
+        },
+        'form/validate': {
+          actions: 'validateForm',
+        },
+        'shipping/method-selected': {
+          actions: 'markStep2Complete',
+        },
+        'step/continue': {
+          target: 'displayingStep3',
+          guard: 'isStep2Valid',
+          actions: 'markStep2Complete',
+        },
       },
     },
-    displayingPaymentMethods: {
+    displayingStep3: {
       entry: 'displayPaymentMethods',
-      always: {
-        target: 'displayingPlaceOrder',
+      on: {
+        'step/change': {
+          actions: 'handleStepChange',
+        },
+        'form/validate': {
+          actions: 'validateForm',
+        },
+        'payment/method-selected': {
+          actions: 'markStep3Complete',
+        },
+        'step/continue': {
+          target: 'displayingStep4',
+          guard: 'isStep3Valid',
+          actions: 'markStep3Complete',
+        },
       },
     },
-    displayingPlaceOrder: {
-      entry: 'displayPlaceOrder',
+    displayingStep4: {
+      entry: ['displayBillToShipping', 'displayPlaceOrder'],
+      on: {
+        'step/change': {
+          actions: 'handleStepChange',
+        },
+        'form/validate': {
+          actions: 'validateForm',
+        },
+        'billing/address-updated': {
+          actions: 'markStep4Complete',
+        },
+        'step/continue': {
+          target: 'placingOrder',
+          guard: 'isStep4Valid',
+          actions: 'markStep4Complete',
+        },
+      },
     },
     placingOrder: {
       entry: 'placeOrder',
@@ -167,6 +205,18 @@ export const checkoutMachine = createMachine({
     isLoggedIn: ({ context }) => {
       return !context.isGuest;
     },
+    isStep1Valid: ({ context }) => {
+      return !context.validationErrors.step1;
+    },
+    isStep2Valid: ({ context }) => {
+      return !context.validationErrors.step2;
+    },
+    isStep3Valid: ({ context }) => {
+      return !context.validationErrors.step3;
+    },
+    isStep4Valid: ({ context }) => {
+      return !context.validationErrors.step4;
+    },
   },
   actions: {
     handleCartInitialized: ({ context, event }) => {
@@ -191,6 +241,31 @@ export const checkoutMachine = createMachine({
     handleOrderPlaced: ({ context, event }) => {
       // Handle order placement
     },
+    handleStepChange: ({ context, event }) => {
+      if (event?.data?.step) {
+        context.activeStep = event.data.step;
+      }
+    },
+    validateForm: ({ context, event }) => {
+      if (event?.data?.step && event?.data?.isValid !== undefined) {
+        context.validationErrors[`step${event.data.step}`] = !event.data.isValid;
+      }
+    },
+    markStep1Complete: ({ context }) => {
+      context.stepsCompleted.step1 = true;
+      context.activeStep = 2;
+    },
+    markStep2Complete: ({ context }) => {
+      context.stepsCompleted.step2 = true;
+      context.activeStep = 3;
+    },
+    markStep3Complete: ({ context }) => {
+      context.stepsCompleted.step3 = true;
+      context.activeStep = 4;
+    },
+    markStep4Complete: ({ context }) => {
+      context.stepsCompleted.step4 = true;
+    },
     displayEmptyCart: ({ context }) => {
       events.emit('checkout/empty-cart');
     },
@@ -200,13 +275,8 @@ export const checkoutMachine = createMachine({
     displayOrderSummary: ({ context }) => {
       events.emit('checkout/display-order-summary');
     },
-    displayGuestAddressForms: ({ context }) => {
+    displayShippingAddress: ({ context }) => {
       events.emit('checkout/display-guest-forms', {
-        isVirtual: context.isVirtual
-      });
-    },
-    displayCustomerAddressForms: ({ context }) => {
-      events.emit('checkout/display-customer-forms', {
         isVirtual: context.isVirtual
       });
     },

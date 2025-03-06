@@ -133,13 +133,60 @@ export default async function decorate(block) {
           <div class="checkout__block checkout__empty-cart"></div>
           <div class="checkout__block checkout__server-error"></div>
           <div class="checkout__block checkout__out-of-stock"></div>
-          <div class="checkout__block checkout__login"></div>
-          <div class="checkout__block checkout__shipping-form"></div>
-          <div class="checkout__block checkout__bill-to-shipping"></div>
-          <div class="checkout__block checkout__delivery"></div>
-          <div class="checkout__block checkout__payment-methods"></div>
-          <div class="checkout__block checkout__billing-form"></div>
-          <div class="checkout__block checkout__place-order"></div>
+          
+          <div class="checkout__steps">
+            <div class="checkout__step checkout__step-1 active" data-step="1">
+              <div class="checkout__step-header">
+                <h2 class="checkout__step-title">Login & Shipping Address</h2>
+                <div class="checkout__step-indicator">1</div>
+              </div>
+              <div class="checkout__step-content">
+                <div class="checkout__block checkout__login"></div>
+                <div class="checkout__block checkout__shipping-form"></div>
+                <div class="checkout__step-actions">
+                  <button class="checkout__continue-btn" data-step="1">Continue</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="checkout__step checkout__step-2" data-step="2">
+              <div class="checkout__step-header">
+                <h2 class="checkout__step-title">Shipping Methods</h2>
+                <div class="checkout__step-indicator">2</div>
+              </div>
+              <div class="checkout__step-content">
+                <div class="checkout__block checkout__delivery"></div>
+                <div class="checkout__step-actions">
+                  <button class="checkout__continue-btn" data-step="2">Continue</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="checkout__step checkout__step-3" data-step="3">
+              <div class="checkout__step-header">
+                <h2 class="checkout__step-title">Payment Method</h2>
+                <div class="checkout__step-indicator">3</div>
+              </div>
+              <div class="checkout__step-content">
+                <div class="checkout__block checkout__payment-methods"></div>
+                <div class="checkout__step-actions">
+                  <button class="checkout__continue-btn" data-step="3">Continue</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="checkout__step checkout__step-4" data-step="4">
+              <div class="checkout__step-header">
+                <h2 class="checkout__step-title">Billing Address</h2>
+                <div class="checkout__step-indicator">4</div>
+              </div>
+              <div class="checkout__step-content">
+                <div class="checkout__block checkout__bill-to-shipping"></div>
+                <div class="checkout__block checkout__billing-form"></div>
+                <div class="checkout__block checkout__place-order"></div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="checkout__aside">
           <div class="checkout__block checkout__order-summary"></div>
@@ -166,6 +213,11 @@ export default async function decorate(block) {
     $orderSummary: checkoutFragment.querySelector('.checkout__order-summary'),
     $cartSummary: checkoutFragment.querySelector('.checkout__cart-summary'),
     $placeOrder: checkoutFragment.querySelector('.checkout__place-order'),
+    $steps: checkoutFragment.querySelector('.checkout__steps'),
+    $step1: checkoutFragment.querySelector('.checkout__step-1'),
+    $step2: checkoutFragment.querySelector('.checkout__step-2'),
+    $step3: checkoutFragment.querySelector('.checkout__step-3'),
+    $step4: checkoutFragment.querySelector('.checkout__step-4'),
   };
 
   block.appendChild(checkoutFragment);
@@ -180,18 +232,86 @@ export default async function decorate(block) {
     },
   });
 
-  // Subscribe to state changes
+  // Start the actor
+  actor.start();
+
+  // Add event handlers for the step navigation
+  const setupStepNavigation = () => {
+    // Step headers click event - expand/collapse
+    const stepHeaders = block.querySelectorAll('.checkout__step-header');
+    stepHeaders.forEach((header) => {
+      header.addEventListener('click', (event) => {
+        const step = event.currentTarget.closest('.checkout__step');
+        const stepNumber = parseInt(step.dataset.step, 10);
+        
+        // Toggle active class to expand/collapse the step
+        if (step.classList.contains('active')) {
+          // If already active, do nothing (keep it open)
+          return;
+        }
+        
+        // Change active step
+        const currentActive = block.querySelector('.checkout__step.active');
+        if (currentActive) {
+          currentActive.classList.remove('active');
+        }
+        step.classList.add('active');
+        
+        // Notify the state machine
+        actor.send({ 
+          type: 'step/change', 
+          data: { step: stepNumber } 
+        });
+      });
+    });
+    
+    // Continue buttons click event
+    const continueButtons = block.querySelectorAll('.checkout__continue-btn');
+    continueButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const stepNumber = parseInt(event.target.dataset.step, 10);
+        
+        // Validate the current step before proceeding
+        // For simplicity, we'll assume all steps are valid
+        actor.send({
+          type: 'form/validate',
+          data: { step: stepNumber, isValid: true }
+        });
+        
+        // Proceed to the next step
+        actor.send({
+          type: 'step/continue',
+          data: { step: stepNumber }
+        });
+      });
+    });
+  };
+  
+  // Subscribe to machine state changes to update the UI
   actor.subscribe({
     next: (snapshot) => {
       console.log('Current state:', snapshot.value);
+      
+      // Update active step based on the machine state
+      if (snapshot.context.activeStep) {
+        const steps = block.querySelectorAll('.checkout__step');
+        steps.forEach((step) => {
+          const stepNumber = parseInt(step.dataset.step, 10);
+          if (stepNumber === snapshot.context.activeStep) {
+            step.classList.add('active');
+          } else {
+            step.classList.remove('active');
+          }
+        });
+      }
     },
     error: (error) => {
       console.error('State machine error:', error);
     },
   });
 
-  // Start the actor
-  actor.start();
+  // Initialize step navigation
+  setupStepNavigation();
 
   // Subscribe to events
   events.on('cart/initialized', (data) => {

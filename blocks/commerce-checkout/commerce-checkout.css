@@ -16,6 +16,86 @@
   gap: var(--spacing-xbig);
 }
 
+/* Collapsible Checkout Steps */
+.checkout__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+}
+
+.checkout__step {
+  border: var(--shape-border-width-1) solid var(--color-neutral-400);
+  border-radius: var(--shape-border-radius-3);
+  overflow: hidden;
+}
+
+.checkout__step-header {
+  background-color: var(--color-neutral-100);
+  padding: var(--spacing-medium);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout__step-title {
+  font: var(--type-headline-3-strong-font);
+  letter-spacing: var(--type-headline-3-strong-letter-spacing);
+  color: var(--color-neutral-800);
+  margin: 0;
+}
+
+.checkout__step-indicator {
+  background-color: var(--color-brand-500);
+  color: var(--color-neutral-0);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font: var(--type-body-2-strong-font);
+}
+
+.checkout__step-content {
+  padding: var(--spacing-medium);
+  display: none;
+}
+
+.checkout__step.active .checkout__step-content {
+  display: block;
+}
+
+.checkout__step-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-big);
+}
+
+.checkout__continue-btn {
+  background-color: var(--color-brand-500);
+  color: var(--color-neutral-0);
+  padding: var(--spacing-xsmall) var(--spacing-medium);
+  border: none;
+  border-radius: var(--shape-border-radius-2);
+  font: var(--type-body-2-strong-font);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.checkout__continue-btn:hover {
+  background-color: var(--color-brand-600);
+}
+
+/* Completed step styling */
+.checkout__step[data-completed="true"] .checkout__step-header {
+  background-color: var(--color-brand-50);
+}
+
+.checkout__step[data-completed="true"] .checkout__step-indicator {
+  background-color: var(--color-success-500);
+}
+
 /* Block dividers */
 .checkout__block.checkout__heading .dropin-header-container {
   gap: var(--spacing-xsmall);
