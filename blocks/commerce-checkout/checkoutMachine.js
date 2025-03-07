@@ -244,6 +244,10 @@ export const checkoutMachine = createMachine({
     handleStepChange: ({ context, event }) => {
       if (event?.data?.step) {
         context.activeStep = event.data.step;
+        
+        // If we're going back to a previous step, we keep the completed status
+        // This allows the edit functionality to work properly
+        // We don't need to change the completed status, just the active step
       }
     },
     validateForm: ({ context, event }) => {

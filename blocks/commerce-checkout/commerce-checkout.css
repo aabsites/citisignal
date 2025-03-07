@@ -46,15 +46,7 @@
 }
 
 .checkout__step-indicator {
-  background-color: var(--color-brand-500);
-  color: var(--color-neutral-0);
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font: var(--type-body-2-strong-font);
+  display: none;
 }
 
 .checkout__step-content {
@@ -333,6 +325,30 @@
 /* Hide empty blocks */
 .order-confirmation__block:empty {
   display: none;
+}
+
+.checkout__step-edit {
+  display: none; /* Hidden by default */
+}
+
+.checkout__step[data-completed="true"] .checkout__step-edit {
+  display: block; /* Show only when step is completed */
+}
+
+.checkout__edit-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-brand-500);
+  font: var(--type-body-2-strong-font);
+  letter-spacing: var(--type-body-2-strong-letter-spacing);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.checkout__edit-btn:hover {
+  color: var(--color-brand-600);
 }
 
 @media only screen and (width >= 320px) and (width <= 768px) {

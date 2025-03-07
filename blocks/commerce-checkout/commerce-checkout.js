@@ -138,7 +138,9 @@ export default async function decorate(block) {
             <div class="checkout__step checkout__step-1 active" data-step="1">
               <div class="checkout__step-header">
                 <h2 class="checkout__step-title">Login & Shipping Address</h2>
-                <div class="checkout__step-indicator">1</div>
+                <div class="checkout__step-edit" data-step="1">
+                  <button class="checkout__edit-btn">Edit</button>
+                </div>
               </div>
               <div class="checkout__step-content">
                 <div class="checkout__block checkout__login"></div>
@@ -152,7 +154,9 @@ export default async function decorate(block) {
             <div class="checkout__step checkout__step-2" data-step="2">
               <div class="checkout__step-header">
                 <h2 class="checkout__step-title">Shipping Methods</h2>
-                <div class="checkout__step-indicator">2</div>
+                <div class="checkout__step-edit" data-step="2">
+                  <button class="checkout__edit-btn">Edit</button>
+                </div>
               </div>
               <div class="checkout__step-content">
                 <div class="checkout__block checkout__delivery"></div>
@@ -165,7 +169,9 @@ export default async function decorate(block) {
             <div class="checkout__step checkout__step-3" data-step="3">
               <div class="checkout__step-header">
                 <h2 class="checkout__step-title">Payment Method</h2>
-                <div class="checkout__step-indicator">3</div>
+                <div class="checkout__step-edit" data-step="3">
+                  <button class="checkout__edit-btn">Edit</button>
+                </div>
               </div>
               <div class="checkout__step-content">
                 <div class="checkout__block checkout__payment-methods"></div>
@@ -178,7 +184,9 @@ export default async function decorate(block) {
             <div class="checkout__step checkout__step-4" data-step="4">
               <div class="checkout__step-header">
                 <h2 class="checkout__step-title">Billing Address</h2>
-                <div class="checkout__step-indicator">4</div>
+                <div class="checkout__step-edit" data-step="4">
+                  <button class="checkout__edit-btn">Edit</button>
+                </div>
               </div>
               <div class="checkout__step-content">
                 <div class="checkout__block checkout__bill-to-shipping"></div>
@@ -241,6 +249,11 @@ export default async function decorate(block) {
     const stepHeaders = block.querySelectorAll('.checkout__step-header');
     stepHeaders.forEach((header) => {
       header.addEventListener('click', (event) => {
+        // Don't trigger if clicking the edit button directly
+        if (event.target.classList.contains('checkout__edit-btn')) {
+          return;
+        }
+        
         const step = event.currentTarget.closest('.checkout__step');
         const stepNumber = parseInt(step.dataset.step, 10);
         
@@ -265,6 +278,32 @@ export default async function decorate(block) {
       });
     });
     
+    // Edit buttons click event
+    const editButtons = block.querySelectorAll('.checkout__edit-btn');
+    editButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent the header click event from firing
+        
+        const stepNumber = parseInt(event.target.closest('.checkout__step-edit').dataset.step, 10);
+        
+        // Change active step
+        const steps = block.querySelectorAll('.checkout__step');
+        steps.forEach((step) => {
+          if (parseInt(step.dataset.step, 10) === stepNumber) {
+            step.classList.add('active');
+          } else {
+            step.classList.remove('active');
+          }
+        });
+        
+        // Notify the state machine
+        actor.send({ 
+          type: 'step/change', 
+          data: { step: stepNumber } 
+        });
+      });
+    });
+    
     // Continue buttons click event
     const continueButtons = block.querySelectorAll('.checkout__continue-btn');
     continueButtons.forEach((button) => {
@@ -277,6 +316,12 @@ export default async function decorate(block) {
           type: 'form/validate',
           data: { step: stepNumber, isValid: true }
         });
+        
+        // Mark the current step as completed (to show edit button)
+        const currentStep = block.querySelector(`.checkout__step-${stepNumber}`);
+        if (currentStep) {
+          currentStep.setAttribute('data-completed', 'true');
+        }
         
         // Proceed to the next step
         actor.send({
@@ -301,6 +346,17 @@ export default async function decorate(block) {
             step.classList.add('active');
           } else {
             step.classList.remove('active');
+          }
+        });
+      }
+      
+      // Update step completion status for edit buttons
+      if (snapshot.context.stepsCompleted) {
+        Object.entries(snapshot.context.stepsCompleted).forEach(([key, completed]) => {
+          const stepNumber = parseInt(key.replace('step', ''), 10);
+          const step = block.querySelector(`.checkout__step-${stepNumber}`);
+          if (step && completed) {
+            step.setAttribute('data-completed', 'true');
           }
         });
       }
