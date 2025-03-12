@@ -123,15 +123,15 @@ main .hero-container > div {
 }
 
 .hero.block.overlay-display-on-hover .overlay {
-  display: none;
+  display: none !important;
 }
 
 .hero.block.overlay-display-on-hover:hover .overlay {
-  display: block;
+  display: flex !important;
 }
 
 .hero.block.overlay-display-never .overlay {
-  display: none;
+  display: none !important;
 }
 
 .hero.block.overlay-alignment-vertical-top .overlay {
@@ -215,7 +215,8 @@ main .hero-container > div {
 
   /* temporary fix to improve LHS */
   main .section:first-of-type.hero-container .hero {
-    min-height: calc(100vh - 130px);
+    height: calc(100vh - 130px);
+    max-height: 800px;
   }
 
   /* Responsive Styles for Default Content Wrapper */

@@ -265,7 +265,7 @@
 }
 
 @media (width >= 900px) {
-  .product-details.gallery-quad .pdp-carousel--main-image-controls .pdp-carousel__wrapper {
+  .product-details.featured-pdp.gallery-quad .pdp-carousel--main-image-controls .pdp-carousel__wrapper {
     width: 50vw;
   }
 }

@@ -67,9 +67,17 @@ export default async function decorate(block) {
       const sku = btn.getAttribute('data-attr-sku');
       const quantity = 1;
 
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', async (e) => {
+        const elem = e.target;
+        elem.disabled = true;
+        elem.textContent = 'Adding...';
         const { addProductsToCart } = await import('@dropins/storefront-cart/api.js');
-        await addProductsToCart([{ sku, quantity }]);
+        try {
+          await addProductsToCart([{ sku, quantity }]);
+        } finally {
+          elem.textContent = 'Add to cart';
+          elem.disabled = false;
+        }
 
         // init Toast
         const productItem = sku.split('/')[0];

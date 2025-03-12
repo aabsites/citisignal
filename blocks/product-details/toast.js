@@ -36,7 +36,9 @@ export default function initToast(quantity, productMetaDescription) {
   const hideToast = () => {
     toast.classList.remove('show');
     setTimeout(() => {
-      toastContainer.removeChild(toast);
+      if (toastContainer.contains(toast)) {
+        toastContainer.removeChild(toast);
+      }
     }, 400); // Match this to the CSS transition duration
   };
 

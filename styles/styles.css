@@ -496,6 +496,11 @@ button:not([class^='elsie-']).secondary:hover {
   text-decoration: none;
 }
 
+/* universal editor and document authoring work around */
+a.button.secondary > em {
+  font-style: normal;
+}
+
 main input:hover {
   border: 1px solid var(--color-neutral-700);
 }

@@ -14,6 +14,9 @@ import { getConfigValue, getCookie, getHeaders } from '../configs.js';
 
 export const getUserTokenCookie = () => getCookie('auth_dropin_user_token');
 
+// Event Bus Logger
+events.enableLogger(true);
+
 // Update auth headers
 const setAuthHeaders = (state) => {
   if (state) {
@@ -37,24 +40,41 @@ export default async function initializeDropins() {
   const init = async () => {
     // Set auth headers on authenticated event
     events.on('authenticated', setAuthHeaders);
+
     // Cache cart data in session storage
     events.on('cart/data', persistCartDataInSession, { eager: true });
 
     // on page load, check if user is authenticated
     const token = getUserTokenCookie();
-    // set auth headers
-    setAuthHeaders(!!token);
-    // emit authenticated event if token has changed
     events.emit('authenticated', !!token);
 
-    // Event Bus Logger
-    events.enableLogger(true);
     // Set Fetch Endpoint (Global)
     setEndpoint(await getConfigValue('commerce-core-endpoint'));
+
+    // Set Fetch Headers
     setFetchGraphQlHeaders(await getHeaders('all'));
+
+    // Set Auth Headers
+    setAuthHeaders(!!token);
 
     // Initialize Global Drop-ins
     await import('./auth.js');
+
+    // 💥 HOT FIX: Validate authentication token is still valid
+    if (token) {
+      await authApi.fetchGraphQl('query VALIDATE_TOKEN{ customerCart { id } }')
+        .then((res) => {
+          const unauthenticated = !!res.errors?.find((error) => error.extensions?.category === 'graphql-authentication' || error.extensions?.category === 'graphql-authorization');
+          if (unauthenticated) throw new Error('Unauthenticated');
+        })
+        .catch(() => {
+          // remove auth token if it's invalid
+          document.cookie = 'auth_dropin_user_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          setAuthHeaders(false);
+          events.emit('authenticated', false);
+        });
+    }
+
     import('./cart.js');
 
     events.on('eds/lcp', async () => {

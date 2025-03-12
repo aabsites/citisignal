@@ -279,7 +279,7 @@ export default async function decorate(block) {
   }, { eager: true });
 
   events.on('pdp/data', (data) => {
-    if (data.optionUIDs && carouselLayout === 'quad') {
+    if (carouselLayout === 'quad') {
       block.classList.add('gallery-quad');
     }
   }, { eager: true });
