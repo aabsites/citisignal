@@ -189,7 +189,7 @@
 }
 
 .product-details.featured-pdp .pdp-carousel__slide > img {
-  /* max-height: 850px; */
+  max-height: 600px;
   border-radius: 8px;
   /* background: var(--loyalty-promotion); */
   box-sizing: border-box;

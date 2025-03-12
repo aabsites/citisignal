@@ -278,20 +278,6 @@
     "id": "product-details",
     "fields": [
       {
-        "component": "text",
-        "valueType": "string",
-        "name": "date",
-        "label": "Date",
-        "description": "Enter a valid date in the format MM/DD/YYYY",
-        "required": true,
-        "validation": {
-          "minLength": 8,
-          "regExp": "^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\\d{4}$",
-          "customErrorMsg": "Enter a valid date in the format MM/DD/YYYY"
-        },
-        "value": ""
-      },
-      {
         "component": "select",
         "valueType": "string",
         "name": "div:nth-child(1)>div:nth-child(2)",
@@ -345,13 +331,6 @@
             "value": "false"
           }
         ]
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "div:nth-child(4)>div:nth-child(2)",
-        "label": "SKU",
-        "value": ""
       }
     ]
   }
