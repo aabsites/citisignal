@@ -189,7 +189,7 @@
 }
 
 .product-details.featured-pdp .pdp-carousel__slide > img {
-  max-height: 600px;
+  max-height: 275px;
   border-radius: 8px;
   /* background: var(--loyalty-promotion); */
   box-sizing: border-box;
@@ -219,6 +219,16 @@
   .product-details.featured-pdp .product-details__price,
   .product-details.featured-pdp .product-details__price .pdp-price {
     margin-top: 0;
+  }
+
+  .product-details.featured-pdp .pdp-carousel__slide > img {
+    max-height: 600px;
+  }
+}
+
+@media (width < 900px) {
+  .product-details .pdp-overlay__content .pdp-carousel__slide > img  {
+    max-height: 100%;
   }
 }
 
